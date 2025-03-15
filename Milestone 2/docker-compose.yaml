@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:13  
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=fintech
+
+    volumes:
+      - "./postgres data mount:/var/lib/postgresql/data:rw"
+      - "./m2_queries:/var/lib/m2_queries:rw"
+    ports:
+      - "5432:5432" 
+
+  ingest_database:
+    build: .
+    image: ingest_database:python3.11
+    depends_on:
+      - postgres
+    restart: on-failure
+    volumes:
+      - ./src:/src  
+      - ./Data:/Data  
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
